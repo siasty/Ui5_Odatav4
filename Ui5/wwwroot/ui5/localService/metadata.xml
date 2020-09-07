@@ -1,0 +1,20 @@
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+	<edmx:DataServices>
+		<Schema Namespace="OdataAPI.Controllers" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+			<EntityType Name="Product">
+				<Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"/><Property Name="Name" Type="Edm.String"/><Property Name="Price" Type="Edm.Decimal" Nullable="false"/><Property Name="Category" Type="Edm.String"/><Property Name="SupplierId" Type="Edm.Int32"/>
+				<NavigationProperty Name="Supplier" Type="OdataAPI.Controllers.Supplier"><ReferentialConstraint Property="SupplierId" ReferencedProperty="Id"/></NavigationProperty>
+			</EntityType>
+			<EntityType Name="Supplier">
+				<Key><PropertyRef Name="Id"/></Key><Property Name="Id" Type="Edm.Int32" Nullable="false"/><Property Name="Name" Type="Edm.String"/><NavigationProperty Name="Products" Type="Collection(OdataAPI.Controllers.Product)"/></EntityType>
+		</Schema>
+		<Schema Namespace="ProductService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+			<Action Name="Rate" IsBound="true"><Parameter Name="bindingParameter" Type="OdataAPI.Controllers.Product"/><Parameter Name="Rating" Type="Edm.Int32" Nullable="false"/></Action>
+			<Function Name="MostExpensive" IsBound="true"><Parameter Name="bindingParameter" Type="Collection(OdataAPI.Controllers.Product)"/><ReturnType Type="Edm.Double" Nullable="false"/></Function>
+			<EntityContainer Name="Container">
+				<EntitySet Name="Products" EntityType="OdataAPI.Controllers.Product"><NavigationPropertyBinding Path="Supplier" Target="Suppliers"/></EntitySet>
+				<EntitySet Name="Suppliers" EntityType="OdataAPI.Controllers.Supplier"><NavigationPropertyBinding Path="Products" Target="Products"/></EntitySet>
+			</EntityContainer>
+		</Schema>
+	</edmx:DataServices>
+</edmx:Edmx>
