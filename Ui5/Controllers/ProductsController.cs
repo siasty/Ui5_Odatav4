@@ -4,10 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-
-using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Formatter;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Results;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Ui5.Data;
@@ -55,127 +58,6 @@ namespace Ui5.Controllers
         {
             IQueryable<Product> result = db.Products.Where(p => p.Id == key);
             return SingleResult.Create(result);
-        }
-
-
-        [HttpPost]
-        public async Task<IActionResult> Post(Product product)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            db.Products.Add(product);
-            await db.SaveChangesAsync();
-            return Created(product);
-        }
-
-        [HttpPatch]
-        public async Task<IActionResult> Patch([FromODataUri] int key, Delta<Product> product)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var entity = await db.Products.FindAsync(key);
-            if (entity == null)
-            {
-                return NotFound();
-            }
-            product.Patch(entity);
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(key))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return Updated(entity);
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> Put([FromODataUri] int key, Product update)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            if (key != update.Id)
-            {
-                return BadRequest();
-            }
-            db.Entry(update).State = EntityState.Modified;
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(key))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return Updated(update);
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromODataUri] int key)
-        {
-            var product = await db.Products.FindAsync(key);
-            if (product == null)
-            {
-                return NotFound();
-            }
-            db.Products.Remove(product);
-            await db.SaveChangesAsync();
-            return StatusCode((int)HttpStatusCode.NoContent);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Rate([FromODataUri] int key, ODataActionParameters parameters)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            int rating = (int)parameters["Rating"];
-            db.Ratings.Add(new ProductRating
-            {
-                ProductID = key,
-                Rating = rating
-            });
-
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateException e)
-            {
-                if (!ProductExists(key))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode((int)HttpStatusCode.NoContent);
         }
 
         [HttpGet]

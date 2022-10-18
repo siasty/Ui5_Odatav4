@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData.Batch;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.OData;
+using Microsoft.AspNetCore.OData.Batch;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 using Ui5.Controllers;
 using Ui5.Data;
 
@@ -22,8 +23,7 @@ namespace Ui5
 {
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<IISServerOptions>(options =>
@@ -38,7 +38,25 @@ namespace Ui5
 
             services.AddDbContext<TestDbContext>(opt => opt.UseInMemoryDatabase("Test"));
 
-            services.AddControllers(mvcOptions => mvcOptions.EnableEndpointRouting = false);
+            services.AddCors(options =>
+            {
+                options.AddPolicy(
+                     "AllowAllOrigins",
+                      builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .WithExposedHeaders("OData-Version")
+                        );
+            });
+
+            var batchHandler = new DefaultODataBatchHandler();
+            services.AddControllers()
+            .AddOData(opt => opt
+                .AddRouteComponents("odata", GetEdmModel(),batchHandler)
+                .Count().Filter().Expand().Select().OrderBy().SetMaxTop(100)
+                .EnableQueryFeatures()
+            );
 
             services.AddCors(options =>
             {
@@ -53,7 +71,7 @@ namespace Ui5
                 options.DefaultPolicyName = "AllowAllOrigins";
             });
 
-            services.AddOData();
+
             services.AddODataQueryFilter();
 
         }
@@ -64,49 +82,40 @@ namespace Ui5
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseODataRouteDebug();
             }
 
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "/")),
-                RequestPath = "/ui5"
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+            
+            app.UseMyOdataMiddleware();
+            app.Use((context, next) =>
+            {
+                 context.Response.Headers["OData-Version"] = "4.0";  
+                 context.Response.Headers["OData-MaxVersion"] = "4.0";      
+                 Console.WriteLine(context.Request.Path);
+                 if (context.Request.Path.ToString().Contains("/odata/$batch"))
+                 {
+                    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+                    context.Response.Headers["Access-Control-Allow-Headers"]= "*";
+                    context.Response.Headers["Access-Control-Expose-Headers"]= "OData-Version";
+
+                }
+                return next.Invoke();
             });
 
-            app.UseRouting();
-
-            app.UseDefaultFiles();
-
+            app.UseODataQueryRequest();
             app.UseODataBatching();
-
-            //app.Use((context, next) =>
-            //{
-            //    context.Response.Headers["OData-Version"] = "4.0";
-            //    return next.Invoke();
-            //});
-
-            app.UseCors();
-
-
-
-
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings[".properties"] = "application/text";
-
-            app.UseStaticFiles(new StaticFileOptions
+            app.UseRouting();
+            app.UseCors("AllowAllOrigins");
+    
+            app.UseEndpoints(endpoints =>
             {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "")),
-                RequestPath = "",
-                ContentTypeProvider = provider
+                endpoints.MapControllers();
             });
-
-            app.UseMvc(routes =>
-            {
-                routes.Select().Expand().Filter().OrderBy().MaxTop(null).Count().EnableContinueOnErrorHeader();
-                routes.MapODataServiceRoute("odata", "odata", GetEdmModel(), new DefaultODataBatchHandler());
-                routes.EnableDependencyInjection();
-            });
-
+            
 
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
@@ -117,8 +126,8 @@ namespace Ui5
                     if (!db.Suppliers.Any())
                     {
                         db.Suppliers.AddRange(new List<Supplier> {
-                        new Supplier { Id = 1, Name = "Stonka", Products =  new List<Product> {CreateNewProduct(1,"Cola", 130, "drink",1), CreateNewProduct(2,"Fanta", 140, "drink", 1) } },
-                        new Supplier { Id = 2, Name = "Biedronka", Products =  new List<Product> {CreateNewProduct(3,"Pepsi", 130, "drink",2), CreateNewProduct(4,"Sprajt", 40, "drink", 2) } },
+                        new Supplier { Id = 1, Name = "Supplier1", Products =  new List<Product> {CreateNewProduct(1,"Product1", 130, "Cat1",1), CreateNewProduct(2,"Product4", 140, "Cat1", 1) } },
+                        new Supplier { Id = 2, Name = "Supplier1", Products =  new List<Product> {CreateNewProduct(3,"Product2", 130, "Cat1",2), CreateNewProduct(4,"Product3", 40, "Cat2", 2) } },
 
                          });
                         db.SaveChanges();
@@ -133,8 +142,8 @@ namespace Ui5
         IEdmModel GetEdmModel()
         {
             var odataBuilder = new ODataConventionModelBuilder();
-            odataBuilder.EntitySet<Product>("Products").EntityType.Filter().Count().Expand().OrderBy().Page().Select();
-            odataBuilder.EntitySet<Supplier>("Suppliers").EntityType.Filter().Count().Expand().OrderBy().Page().Select(); ;
+            odataBuilder.EntitySet<Product>("Products");
+            odataBuilder.EntitySet<Supplier>("Suppliers");
 
             odataBuilder.Namespace = "ProductService";
             odataBuilder.EntityType<Product>().Action("Rate").Parameter<int>("Rating");
