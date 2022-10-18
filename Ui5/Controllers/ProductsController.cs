@@ -13,9 +13,9 @@ using Microsoft.AspNetCore.OData.Results;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Ui5.Data;
+using Ui5_Backend.Data;
 
-namespace Ui5.Controllers
+namespace Ui5_Backend.Controllers
 {
     
     public class Product

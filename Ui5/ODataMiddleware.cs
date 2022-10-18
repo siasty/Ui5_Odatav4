@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
 
-namespace Ui5
+namespace Ui5_Backend
 {
     public class HttpGetOrHeadAttribute : HttpMethodAttribute
     {

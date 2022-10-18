@@ -16,10 +16,10 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
 using Microsoft.OData.ModelBuilder;
-using Ui5.Controllers;
-using Ui5.Data;
+using Ui5_Backend.Controllers;
+using Ui5_Backend.Data;
 
-namespace Ui5
+namespace Ui5_Backend
 {
     public class Startup
     {
