@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "d:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj": {}
+    "D:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj": {}
   },
   "projects": {
-    "d:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj": {
+    "D:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "d:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj",
+        "projectUniqueName": "D:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj",
         "projectName": "Ui5_Backend",
-        "projectPath": "d:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj",
+        "projectPath": "D:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\Ui5_Backend.csproj",
         "packagesPath": "C:\\Users\\maciej.miskiewicz\\.nuget\\packages\\",
-        "outputPath": "d:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\obj\\",
+        "outputPath": "D:\\ui5OdataSample\\Ui5_Odatav4\\Ui5_Backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\maciej.miskiewicz\\AppData\\Roaming\\NuGet\\NuGet.Config"

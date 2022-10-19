@@ -126,8 +126,8 @@ namespace Ui5_Backend
                     if (!db.Suppliers.Any())
                     {
                         db.Suppliers.AddRange(new List<Supplier> {
-                        new Supplier { Id = 1, Name = "Supplier1", Products =  new List<Product> {CreateNewProduct(1,"Product1", 130, "Cat1",1), CreateNewProduct(2,"Product4", 140, "Cat1", 1) } },
-                        new Supplier { Id = 2, Name = "Supplier1", Products =  new List<Product> {CreateNewProduct(3,"Product2", 130, "Cat1",2), CreateNewProduct(4,"Product3", 40, "Cat2", 2) } },
+                        new Supplier { Id = 1, Name = "Supplier1", Products =  new List<Product> { CreateNewProduct(1,"Product1", 13, "Cat1",1), CreateNewProduct(2,"Product2", 140, "Cat1", 1) } },
+                        new Supplier { Id = 2, Name = "Supplier1", Products =  new List<Product> {CreateNewProduct(3,"Product3", 130, "Cat1",2), CreateNewProduct(4,"Product4", 40, "Cat2", 2) } },
 
                          });
                         db.SaveChanges();
