@@ -1,5 +1,5 @@
 
-ntegrating SAPUI5 with an Old SAP System: Using RFC Connection and OData Controllers
+Integrating SAPUI5 with an Old SAP System: Using RFC Connection and OData Controllers
 
 ![image](https://user-images.githubusercontent.com/39690589/196633355-32fdf144-d69e-45d4-8de3-595615176a10.png)
 
